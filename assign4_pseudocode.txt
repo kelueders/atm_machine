@@ -1,0 +1,120 @@
+'''
+Programming Assignment 3 - Pseudocode
+For the ATM machine program with menu options and file saving feature
+'''
+
+Module main()
+    # Declare variables
+    Declare Integer menu_option
+
+    # Lead user through the menu options
+    While menu_option != 4:
+
+        Set customer_info = read_file(name)
+        name = customer_info[0]
+        account_num = customer_info[1]
+        account_bal = customer_info[2]
+
+        Display "Please select from the following ATM options: "
+        Display "1. Deposit"
+        Display "2. Withdrawal"
+        Display "3. Check Balance"
+        Display "4. Enter new customer info"
+        Display "5. Change customers"
+        Display "6. Exit"
+
+        Display "Enter number here: "
+        Input menu_option
+
+        Select menu_option
+            Case 1:
+                Set account_bal = deposit(account_bal)
+            Case 2:
+                Set account_bal = withdrawal(account_bal)
+            Case 3:
+                Call check_balance(name, account_num, account_bal)
+            Case 4:
+                Call collect_info()
+            Case 5:
+                name = input("Account holder name: ")
+            Case 6:
+                Call check_balance(name, account_num, account_bal)
+                Display "Thank you. Have a great day!"
+            Default:
+                Display "Invalid input. Please enter only 1, 2, 3, or 4"
+    End While
+End Module
+
+Function Integer withdrawal(Float account_balance)
+    Declare Float withdrawal_amt
+    Declare Constant Float TRANSACTION_FEE = 1.50
+
+    Display "How much do you want to withdraw? "
+    Input withdrawal_amt
+
+    # Perform calculations
+    Declare Float withdrawal_plus_fee = withdrawal_amt + TRANSACTION_FEE
+
+    # Determine if there are enough funds in account
+    If withdrawal_plus_fee <= account_bal
+        Set account_bal = account_bal - withdrawal_plus_fee
+        Display "New account balance is: $", account_bal
+    Else
+        Display "Not enough funds in account. Transaction failed."
+    End If
+
+    Return account_balance
+End Function
+
+Function Integer deposit(account_balance)
+    Declare deposit_amt
+    Display "How much do you want to deposit? $"
+
+    Set account_balance += deposit_amt
+    Display "**Your new account balance is: ${account_balance:.2f}**"
+
+    Return account_balance
+End Function
+
+Module check_balance(name, account_num, account_balance)
+    Display "**ACCOUNT BALANCE**"
+    Display f"Name: {name}"
+    Display f"Account Number: {account_num}"
+    Display f"Account Balance: ${account_balance:.2f}"
+End Module
+
+Function collect_info()
+    Declare String name
+    Declare Integer account_num
+    Declare Float account_bal
+
+    # Collect user input
+    Display "Please enter your information below when prompted."
+    Display "Account Holder's Name: "
+    Input name
+    Display "Account Number: "
+    Input account_num
+    Display "Account Balance: "
+    Input account_bal
+
+    Call Module write_file(name, account_num, account_bal)
+End Function
+
+Module write_file(name, account_num, account_balance)
+    Declare OutputFile customerFile
+    Open customerFile "{name}.txt"
+    Write customerFile name
+    Write customerFile account_num
+    Write customerFile account_bal
+    Close customerFile
+End Module
+
+Function Array read_file(name)
+    Open customerFile "{name}.txt"
+    name = customerFile.readline()
+    account_num = customerFile.readline()
+    account_bal = customerFile.readline()
+
+    customerFile.close()
+    Return [name, account_num, account_bal]
+End Function
