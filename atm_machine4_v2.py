@@ -127,8 +127,8 @@ def write_file(name, account_num, account_balance):
 
     data.close()
 
-def read_file(name):
-    data = open(f'P4ATMdata.txt', 'r')
+def read_data(file):
+    data = open(f'{file}', 'r')
     name_arr = []
     account_num_arr = []
     account_bal_arr = []
