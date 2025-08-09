@@ -8,13 +8,13 @@ Course Name: Programming Logic & Technique
 
 Course Num: CIS1400-NET02
 
-Assignment: Assignment #3
+Assignment: Assignment #4
 
 Author: Kate Lueders
 
 Version: 1.0
 
-Date: 08/03/2025
+Date: 08/09/2025
 
 Input: string, string, float, float
 
@@ -24,55 +24,87 @@ Output: int, prints to console
 def main():
     # Declare variables
     menu_option = 0
-    name = ""
+    account_num = None
 
-    if not name:
-        name = collect_info()
+    while True:
+        existing_customer = input("Are you an existing customer? (y/n)")
+        if existing_customer == "y":
+            menu_option = 5
+            break
+        elif existing_customer == "n":
+            menu_option = 4
+            break
+        else:
+            print("Invalid entry. Please try again.")
 
-    # Lead user through the menu options
+    account_num = menu_caller(menu_option)
+
     while menu_option != 6:
+        # Lead user through the menu options
+        menu_option = display_menu_and_validate()
+        account_num = menu_caller(menu_option, account_num)
 
-        # Read the customer file and set the variables to the contents of the file
-        customer_info = read_file(name)
+def menu_caller(menu_option, account_num=None):
+
+
+    # Only get customer info for options that require it
+    if menu_option in [1, 2, 3, 6]:
+        if not account_num:
+            print("Error: No account selected. Please select or create an account first.")
+            return account_num
+        customer_info = read_file(account_num)
+        if customer_info is None:
+            print("Error: Account not found. Please enter a valid account number.")
+            return account_num
         name = customer_info[0]
         account_num = customer_info[1]
         account_bal = customer_info[2]
 
-        print("")
-        print("Please select from the following ATM options: ")
-        print("1. Deposit")
-        print("2. Withdraw")
-        print("3. Check Balance")
-        print("4. Enter new customer info")
-        print("5. Change customers")
-        print("6. Exit")
-        try:
-            menu_option = int(input("Enter number here: "))
-        except ValueError:
-            print("")
-            print("**Invalid entry. Please enter only 1, 2, 3, 4, 5, 6")
-            continue
-        print("")
+    match menu_option:
+        case 1:
+            # Deposit
+            account_bal = deposit(account_bal)
+            write_file(name, account_num, account_bal)
+        case 2:
+            # Withdraw
+            account_bal = withdrawal(account_bal)
+            write_file(name, account_num, account_bal)
+        case 3:
+            # Check balance
+            check_balance(name, account_num, account_bal)
+        case 4:
+            # Enter new customer information
+            account_num = collect_info()
+            return account_num
+        case 5:
+            # Access existing customer account
+            account_num = input("Customer account number: ")
+            return account_num
+        case 6:
+            # EXIT
+            check_balance(name, account_num, account_bal)
+            print("Thank you. Have a great day!")
+        case _:
+            # Error message
+            print("**Invalid entry. Please enter only 1, 2, 3, 4, 5, or 6")
 
-        match menu_option:
-            case 1:
-                account_bal = deposit(account_bal)
-                write_file(name, account_num, account_bal)
-            case 2:
-                account_bal = withdrawal(account_bal)
-                write_file(name, account_num, account_bal)
-            case 3:
-                check_balance(name, account_num, account_bal)
-            case 4:
-                collect_info()
-            case 5:
-                name = input("Account holder name: ")
-            case 6:
-                # EXIT
-                check_balance(name, account_num, account_bal)
-                print("Thank you. Have a great day!")
-            case _:
-                print("**Invalid entry. Please enter only 1, 2, 3, or 4")
+def display_menu_and_validate(menu_option=0):
+    print("")
+    print("Please select from the following ATM options: ")
+    print("[1] Deposit")
+    print("[2] Withdraw")
+    print("[3] Check balance")
+    print("[4] Enter new customer info")
+    print("[5] Change customers")
+    print("[6] Exit")
+    try:
+        menu_option = int(input("Enter number here: "))
+    except ValueError:
+        print("")
+        print("**Invalid entry. Please enter only 1, 2, 3, 4, 5, or 6")
+    print("")
+
+    return menu_option
 
 def withdrawal(account_balance):
     TRANSACTION_FEE = 1.50
@@ -118,27 +150,30 @@ def collect_info():
     account_bal = float(input("Account Balance: $"))
     print("")
     write_file(name, account_num, account_bal)
-    return name
+    return account_num
 
 def write_file(name, account_num, account_balance):
-    customer_file = open(f'{name}.txt', 'w')
+    records = open(f'records.dat', 'a')
 
-    customer_file.write(f'{name}\n')
-    customer_file.write(f'{account_num}\n')
-    customer_file.write(f'{account_balance}\n')
+    records.write(f'{name}, {account_num}, {account_balance:.2f}\n')
 
-    customer_file.close()
+    records.close()
 
-def read_file(name):
-    customer_file = open(f'{name}.txt', 'r')
+def read_file(account_num):
+    records = open(f'records.dat', 'r')
 
-    name = customer_file.readline().strip()
-    account_num = customer_file.readline().strip()
-    account_balance = float(customer_file.readline().strip())
+    for record in records:
+        customer_data = record.strip().split(", ")
+        if customer_data[1] == account_num:
+            name = customer_data[0]
+            account_num = customer_data[1]
+            account_balance = float(customer_data[2])
+            return [name, account_num, account_balance]
+        else:
+            continue
+    print("No account found")
 
-    customer_file.close()
-
-    return [name, account_num, account_balance]
+    records.close()
 
 if __name__ == "__main__":
     main()
