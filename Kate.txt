@@ -1,3 +1,20 @@
 Kate
 123
 40.0
+
+customer_record = d.strip().split(", ")
+name_arr.append(customer_record[0])
+account_num_arr.append(customer_record[1])
+account_bal_arr.append(float(customer_record[2]))
+counter += 1
+
+customer_record = line.strip().split(", ")
+
+new_lines.append(f"{name}, {account_num}, {account_balance:.2f}\n")
+
+new_lines.append(line)
+
+data.close()
+
+with open(file, 'w') as file:
+    file.writelines(new_lines)

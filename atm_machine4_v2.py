@@ -8,13 +8,13 @@ Course Name: Programming Logic & Technique
 
 Course Num: CIS1400-NET02
 
-Assignment: Assignment #3
+Assignment: Assignment #4
 
 Author: Kate Lueders
 
 Version: 1.0
 
-Date: 08/03/2025
+Date: 08/09/2025
 
 Input: string, string, float, float
 
@@ -25,54 +25,73 @@ def main():
     # Declare variables
     menu_option = 0
     name = ""
-
-    if not name:
-        name = collect_info()
+    file = 'P4ATMdata.txt'
 
     # Lead user through the menu options
     while menu_option != 6:
 
-        # Read the customer file and set the variables to the contents of the file
-        customer_info = read_file(name)
-        name = customer_info[0]
-        account_num = customer_info[1]
-        account_bal = customer_info[2]
+        # Read the ATM data
+        data = read_data(file)
+        names = data[0]
+        account_nums = data[1]
+        account_bals = data[2]
 
-        print("")
-        print("Please select from the following ATM options: ")
-        print("1. Deposit")
-        print("2. Withdraw")
-        print("3. Check Balance")
-        print("4. Enter new customer info")
-        print("5. Change customers")
-        print("6. Exit")
-        try:
-            menu_option = int(input("Enter number here: "))
-        except ValueError:
-            print("")
-            print("**Invalid entry. Please enter only 1, 2, 3, 4, 5, 6")
-            continue
-        print("")
+        account_num = input("Enter account number: ")
 
-        match menu_option:
-            case 1:
-                account_bal = deposit(account_bal)
-                write_file(name, account_num, account_bal)
-            case 2:
-                account_bal = withdrawal(account_bal)
-                write_file(name, account_num, account_bal)
-            case 3:
-                check_balance(name, account_num, account_bal)
-            case 4:
+        for i, num in enumerate(account_nums):
+            if num == account_num:
+                name = names[i]
+                account_bal = account_bals[i]
+                print(f"**Welcome {name}!**")
+                print("")
+                print("Please select from the following ATM options: ")
+                print("1. Deposit")
+                print("2. Withdraw")
+                print("3. Check Balance")
+                print("4. Enter new customer info")
+                print("5. Change customers")
+                print("6. Exit")
+                try:
+                    menu_option = int(input("Enter selection here: "))
+                except ValueError:
+                    print("")
+                    print("**Invalid entry. Please enter only 1, 2, 3, 4, 5, 6")
+                    continue
+                print("")
+
+
+                match menu_option:
+                    case 1:
+                        # Deposit
+                        account_bal = deposit(account_bal)
+                        update_account_balance(file, name, account_num, account_bal)
+                    case 2:
+                        # Withdraw
+                        account_bal = withdrawal(account_bal)
+                        update_account_balance(file, name, account_num, account_bal)
+                    case 3:
+                        # Check balance
+                        check_balance(name, account_num, account_bal)
+                    case 4:
+                        # Enter new customer information
+                        collect_info()
+                    case 5:
+                        break
+                    case 6:
+                        # EXIT
+                        check_balance(name, account_num, account_bal)
+                        print("Thank you. Have a great day!")
+                    case _:
+                        # Error message
+                        print("**Invalid entry. Please enter only 1, 2, 3, or 4")
+                break
+        else:
+            print("Account not found.")
+            add_desire = input("Would you like to be added to the account list? (y/n)")
+            if add_desire == "y":
                 collect_info()
-            case 5:
-                name = input("Account holder name: ")
-            case 6:
-                # EXIT
-                check_balance(name, account_num, account_bal)
+            elif add_desire == "n":
                 print("Thank you. Have a great day!")
-            case _:
-                print("**Invalid entry. Please enter only 1, 2, 3, or 4")
 
 def withdrawal(account_balance):
     TRANSACTION_FEE = 1.50
@@ -118,10 +137,10 @@ def collect_info():
     account_bal = float(input("Account Balance: $"))
     print("")
     write_file(name, account_num, account_bal)
-    return name
+    return account_num
 
-def write_file(name, account_num, account_balance):
-    data = open(f'P4ATMdata.txt', 'w')
+def write_file(file, name, account_num, account_balance):
+    data = open(file, 'a')
 
     data.write(f'{name}, {account_num}, {account_balance:.2f}\n')
 
@@ -129,19 +148,41 @@ def write_file(name, account_num, account_balance):
 
 def read_data(file):
     data = open(f'{file}', 'r')
+    counter = 0
     name_arr = []
     account_num_arr = []
     account_bal_arr = []
 
     for d in data:
-        customer_record = d.strip().split(", ")
-        name_arr.append(customer_record[0])
-        account_num_arr.append(customer_record[1])
-        account_bal_arr.append(float(customer_record[2]))
+        if counter < 20:
+            customer_record = d.strip().split(", ")
+            name_arr.append(customer_record[0])
+            account_num_arr.append(customer_record[1])
+            account_bal_arr.append(float(customer_record[2]))
+            counter += 1
 
     data.close()
 
     return [name_arr, account_num_arr, account_bal_arr]
+
+def update_account_balance(file, name, account_num, account_balance):
+    # Read all lines from the file
+    data = open(file, 'r')
+
+    new_lines = []
+    for line in data:
+        customer_record = line.strip().split(", ")
+        if customer_record[1] == account_num:
+            # If the line corresponds to the customer that needs updating, update the line and append it to the new list
+            new_lines.append(f"{name}, {account_num}, {account_balance:.2f}\n")
+        else:
+            # If the line doesn't need updating, append it as is
+            new_lines.append(line)
+    
+    data.close()
+
+    with open(file, 'w') as file:
+        file.writelines(new_lines)
 
 if __name__ == "__main__":
     main()

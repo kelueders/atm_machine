@@ -1,2 +1,7 @@
 *.png
 __pycache__
+*.odt
+*.pdf
+*.zip
+*.odt#
+record_layout.txt
